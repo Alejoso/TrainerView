@@ -378,16 +378,37 @@ function interviewChat() {
                                 const isLastQuestion = index === currentQuestionIndex;
 
                                 return (
-                                    <div key={id} className="max-w-4xl mx-auto space-y-4">
+                                    <motion.div
+                                        key={id}
+                                        className="max-w-4xl mx-auto space-y-4"
+                                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{
+                                            duration: 0.6,
+                                            ease: "easeOut",
+                                            delay: index * 0.2
+                                        }}
+                                    >
                                         {/* Mensaje del entrevistador tipo WhatsApp */}
-                                        <div className="flex items-start gap-3">
+                                        <motion.div
+                                            className="flex items-start gap-3"
+                                            initial={{ opacity: 0, x: -30 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{
+                                                duration: 0.5,
+                                                ease: "easeOut",
+                                                delay: index * 0.2 + 0.1
+                                            }}
+                                        >
                                             <div className="flex-shrink-0">
                                                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                                                     👤
                                                 </div>
                                             </div>
                                             <div className="flex-1 max-w-xl">
-                                                <div className="bg-zinc-700 rounded-2xl rounded-tl-sm p-4 shadow-lg">
+                                                <div
+                                                    className="bg-zinc-700 rounded-2xl rounded-tl-sm p-4 shadow-lg"
+                                                >
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="font-semibold text-blue-300">Entrevistador</span>
                                                     </div>
@@ -404,10 +425,19 @@ function interviewChat() {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
 
                                         {/* Respuesta del usuario */}
-                                        <div className="flex items-start gap-3 justify-end">
+                                        <motion.div
+                                            className="flex items-start gap-3 justify-end"
+                                            initial={{ opacity: 0, x: 30 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{
+                                                duration: 0.5,
+                                                ease: "easeOut",
+                                                delay: index * 0.2 + 0.1 + (textoPregunta.length * 0.05) + 0.3
+                                            }}
+                                        >
                                             <div className="flex-1 max-w-xl">
                                                 {tipoRespuesta === "texto" ? (
                                                     // Respuesta de texto tipo WhatsApp
@@ -496,8 +526,8 @@ function interviewChat() {
                                                     {userName ? userName[0].toUpperCase() : '🗣️'}
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        </motion.div>
+                                    </motion.div>
                                 );
                             })
                         ) : (
