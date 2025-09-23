@@ -77,7 +77,7 @@ function interviewChat() {
                     id: questionId,
                     category: category,
                     textoRespuesta: value,
-                    responseTime: 0,
+                    responseTime: responseTime,
                 };
 
                 return updated;
@@ -133,13 +133,15 @@ function interviewChat() {
                                     ...updated[exists],
                                     textoRespuesta: data.text,
                                     isSubmitted: true,
-                                    audioDuration: duration
+                                    audioDuration: duration,
+                                    responseTime: duration,   // 👈 aquí igualamos
+
                                 };
                                 return updated;
                             } else {
                                 return [
                                     ...prevRespuestas,
-                                    { id: questionId, category: question?.categoria || "", textoRespuesta: data.text, responseTime: 0, isSubmitted: true, audioDuration: duration },
+                                    { id: questionId, category: question?.categoria || "", textoRespuesta: data.text, responseTime: duration, isSubmitted: true, audioDuration: duration },
                                 ];
                             }
                         });
@@ -194,65 +196,25 @@ function interviewChat() {
     const defaultQuestions = [
         {
             "id": 1,
-            "categoria": "habilidades blandas",
-            "textoPregunta": "Cuéntame sobre una situación en la que tuviste que resolver un conflicto dentro de un equipo de trabajo. ¿Cómo lo manejaste?",
-            "tipoRespuesta": "texto",
-        },
-        {
+            "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
+            "tipoRespuesta": "texto"
+          },
+          {
             "id": 2,
-            "categoria": "habilidades blandas",
-            "textoPregunta": "¿Cómo priorizas tus tareas cuando tienes múltiples responsabilidades con plazos ajustados?",
-            "tipoRespuesta": "audio",
-
-        },
-        {
+            "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
+            "tipoRespuesta": "texto"
+          },
+          {
             "id": 3,
-            "categoria": "habilidades blandas",
-            "textoPregunta": "Dame un ejemplo de un proyecto en el que tuviste que demostrar liderazgo. ¿Qué acciones tomaste?",
-            "tipoRespuesta": "texto",
-        },
-        {
-            "id": 4,
-            "categoria": "habilidades blandas",
-            "textoPregunta": "¿Cómo te aseguras de comunicar ideas técnicas complejas a personas que no tienen un trasfondo técnico?",
-            "tipoRespuesta": "audio",
-        },
-        {
-            "id": 5,
-            "categoria": "habilidades blandas",
-            "textoPregunta": "Cuando enfrentas un problema sin una solución clara, ¿cuál es tu proceso para encontrar una alternativa adecuada?",
-            "tipoRespuesta": "texto",
-        },
-        {
-            "id": 6,
-            "categoria": "conocimiento general",
-            "textoPregunta": "¿Cuál es la diferencia principal entre un sistema operativo de propósito general y uno en tiempo real?",
-            "tipoRespuesta": "audio",
-        },
-        {
-            "id": 7,
-            "categoria": "conocimiento general",
-            "textoPregunta": "Explícanos qué es la normalización en bases de datos y por qué es importante.",
-            "tipoRespuesta": "texto",
-        },
-        {
-            "id": 8,
-            "categoria": "conocimiento general",
-            "textoPregunta": "¿Qué ventajas e inconvenientes tiene el uso de arquitecturas en la nube frente a infraestructuras locales?",
-            "tipoRespuesta": "audio",
-        },
-        {
-            "id": 9,
-            "categoria": "conocimiento general",
-            "textoPregunta": "¿Podrías describir el ciclo de vida del desarrollo de software (SDLC) y mencionar una metodología que hayas utilizado?",
-            "tipoRespuesta": "texto",
-        },
-        {
-            "id": 10,
-            "categoria": "conocimiento general",
-            "textoPregunta": "¿Qué mecanismos de seguridad consideras esenciales al diseñar un sistema de información?",
-            "tipoRespuesta": "audio",
-        }
+            "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
+            "tipoRespuesta": "texto"
+          }
     ];
 
     const [questions, SetQuestions] = useState<any[]>(defaultQuestions);
@@ -340,6 +302,25 @@ function interviewChat() {
     // useEffect(() => {
     //     generateQuestions(); 
     // } , []);
+
+
+    const handleFinish = async () => {
+
+        console.log("Generando preguntas...")
+
+        try {
+            
+            const res = await fetch("/api/analizeResponses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ respuestas: answers , preguntas: questions })
+              });
+
+        } catch (err: any) {
+            console.log(err)
+            toast.error(err || "Se produjo un error")
+        }
+    }; 
 
 
     return (
@@ -541,7 +522,7 @@ function interviewChat() {
                 {/* Botón para mostrar respuestas */}
                 <div className="flex justify-center">
                     <button
-                        onClick={showResponses}
+                        onClick={handleFinish}
                         className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition font-medium shadow-md"
                     >
                         Mostrar respuestas y preguntas
