@@ -37,6 +37,7 @@ function TypingText({ text, speed = 50 }: { text: string; speed?: number }) {
 }
 
 function interviewChat() {
+    const router = useRouter(); 
     const [userName, setUserName] = useState<string | null>(null);
     const [userJob, setUserJob] = useState<string | null>(null);
     const [numberOfQuestions, setNumberOfQuestions] = useState<string | null>(null);
@@ -125,7 +126,7 @@ function interviewChat() {
                         // Guardar la transcripción como respuesta
                         setAnswers((prevRespuestas) => {
                             const exists = prevRespuestas.findIndex((r) => r.id === questionId);
-                            const question = questions.find(q => q.id === questionId);
+                            const question = questions?.find(q => q.id === questionId);
 
                             if (exists !== -1) {
                                 const updated = [...prevRespuestas];
@@ -149,7 +150,7 @@ function interviewChat() {
                         toast.success("Audio transcrito correctamente");
 
                         // Avanzar a la siguiente pregunta
-                        if (currentQuestionIndex < questions.length - 1) {
+                        if (questions && currentQuestionIndex < questions.length - 1) {
                             setCurrentQuestionIndex(currentQuestionIndex + 1);
                         } else {
                             toast.success("¡Entrevista completada!");
@@ -278,7 +279,7 @@ function interviewChat() {
             });
 
             // Avanzar a la siguiente pregunta inmediatamente
-            if (currentQuestionIndex < questions.length - 1) {
+            if (questions && currentQuestionIndex < questions.length - 1) {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
             } else {
                 toast.success("¡Entrevista completada!");
@@ -306,15 +307,20 @@ function interviewChat() {
 
     const handleFinish = async () => {
 
-        console.log("Generando preguntas...")
+        console.log("Generando analisis...")
 
         try {
-            
+            console.log(answers , questions); 
+
             const res = await fetch("/api/analizeResponses", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ respuestas: answers , preguntas: questions })
               });
+
+              const data = await res.json(); 
+              localStorage.setItem("analisis", JSON.stringify(data));
+              router.push("/interviewChat/interviewAnalysis")
 
         } catch (err: any) {
             console.log(err)

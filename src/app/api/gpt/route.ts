@@ -21,23 +21,25 @@ export async function POST(request: Request) {
   Vas a entrevistar a una persona llamada "${userName}" para la posición de "${userJob}". 
 
   Tu tarea es generar exactamente ${numberOfQuestions} preguntas de entrevista. 
-  Las preguntas deben cubrir dos categorías principales:
+  Las preguntas deben cubrir 3 categorías principales:
   1. Habilidades blandas (comunicación, trabajo en equipo, resolución de problemas, liderazgo, etc.)
-  2. Conocimientos generales sobre el área de trabajo correspondiente a la posición.
+  2. Habilidades técnicas sobre el área de trabajo correspondiente a la posición.
+  3. trabajo bajo presión ( situación donde hay limite de tiempo para entregar un trabajo, deadlines, etc).
   Estas preguntas deben estar equilibradas, todas no deben ser de una sola categoria.
-
   El resultado debe entregarse únicamente en un JSON válido que represente una lista de preguntas, 
   sin explicaciones ni texto adicional. 
 
   Cada pregunta debe tener los siguientes campos:
   - id: número autoincremental empezando en 1
-  - categoria: "habilidades blandas" o "conocimiento general"
+  - categoria: "habilidades blandas" o "habilidades técnicas" o "trabajo bajo presión"
   - textoPregunta: la redacción de la pregunta
 
   Ejemplo de formato esperado:
   [
     { "id": 1, "categoria": "habilidades blandas", "textoPregunta": "..." },
-    { "id": 2, "categoria": "conocimiento general", "textoPregunta": "..." }
+    { "id": 2, "categoria": "trabajo bajo presión", "textoPregunta": "..." }, 
+    { "id": 3, "categoria": "habilidades técnicas", "textoPregunta": "..." }
+
   ]` 
       }
       ],
