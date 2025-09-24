@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 
 // Componente para efecto de typing
-function TypingText({ text, speed = 50 }: { text: string; speed?: number }) {
+function TypingText({ text, speed = 50, onComplete}: { text: string; speed?: number ; onComplete?: () => void; }) {
     const [displayedText, setDisplayedText] = useState("");
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -17,6 +17,9 @@ function TypingText({ text, speed = 50 }: { text: string; speed?: number }) {
             }, speed);
 
             return () => clearTimeout(timer);
+        } else {
+            // Cuando termina de escribir todo
+            if (onComplete) onComplete();
         }
     }, [currentIndex, text, speed]);
 
@@ -69,7 +72,7 @@ function interviewChat() {
 
         setAnswers((prevRespuestas) => {
             const exists = prevRespuestas.findIndex((r) => r.id === questionId);
-
+           
             if (exists !== -1) {
                 // update existing answer
                 const updated = [...prevRespuestas];
@@ -179,10 +182,11 @@ function interviewChat() {
         }
     };
 
-    const stopRecording = () => {
+    const stopRecording = (id: string) => {
         mediaRecorderRef.current?.stop();
         setRecording(false);
         toast.success("Grabación detenida, procesando...");
+        recordResponseTime("Detener", id, setAnswers ); 
     };
 
     // Función para formatear la duración del audio
@@ -207,7 +211,7 @@ function interviewChat() {
             "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
             "categoria": "Habilidades blandas",
             "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
-            "tipoRespuesta": "texto"
+            "tipoRespuesta": "audio"
           },
           {
             "id": 3,
@@ -261,6 +265,44 @@ function interviewChat() {
         console.log(questions);
     }
 
+    let responseTime: number = 0; // aquí guardamos el tiempo de respuesta para cada pregunta
+
+    const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+const startTimeRef = useRef<number>(0);
+
+    const recordResponseTime = (
+        modo: "Iniciar" | "Detener",
+        id: string,
+        setAnswers: React.Dispatch<React.SetStateAction<
+            { id: string; category: string; textoRespuesta: string; responseTime: number; isSubmitted?: boolean; audioDuration?: number }[]
+        >>
+        ) => {
+        if (modo === "Iniciar") {
+            startTimeRef.current = Date.now();
+            if (timerIdRef.current) clearInterval(timerIdRef.current); // evitar duplicados
+            timerIdRef.current = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            console.log("Tiempo transcurrido:", elapsed, "s");
+            }, 1000);
+        }
+
+        if (modo === "Detener") {
+            if (timerIdRef.current) {
+            clearInterval(timerIdRef.current);
+            timerIdRef.current = null;
+            const duration = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            console.log("Tiempo total:", duration, "s");
+            setAnswers(prev =>
+                prev.map(ans =>
+                ans.id === id ? { ...ans, responseTime: duration } : ans
+                )
+            );
+            }
+        }
+    };
+
+
+
     const handleSendResponseText = (questionId: string) => {
         const currentAnswer = answers.find((r) => r.id === questionId);
         if (currentAnswer?.textoRespuesta?.trim()) {
@@ -292,7 +334,7 @@ function interviewChat() {
     const handleSendResponseAudio = (questionId: string) => {
         if (recording && currentRecordingQuestionId === questionId) {
             // Si está grabando esta pregunta, detener la grabación
-            stopRecording();
+            stopRecording(questionId);
         } else if (!recording) {
             // Si no está grabando, iniciar grabación para esta pregunta
             startRecording(questionId);
@@ -327,6 +369,17 @@ function interviewChat() {
             toast.error(err || "Se produjo un error")
         }
     }; 
+
+   useEffect(() => {
+        // Encuentra la pregunta activa
+        const activeQuestion = questions[currentQuestionIndex];
+        const respuesta = answers.find(r => r.id === activeQuestion?.id);
+
+        // Solo iniciar el cronómetro si la pregunta existe y no se ha enviado respuesta
+        if (activeQuestion && (!respuesta || !respuesta.isSubmitted)) {
+            recordResponseTime("Iniciar", activeQuestion.id, setAnswers);
+        }
+    }, [currentQuestionIndex, questions]);
 
 
     return (
@@ -400,7 +453,13 @@ function interviewChat() {
                                                         <span className="font-semibold text-blue-300">Entrevistador</span>
                                                     </div>
                                                     <p className="text-gray-200 leading-relaxed">
-                                                        <TypingText text={textoPregunta} speed={50} />
+                                                        <TypingText text={textoPregunta} speed={50} 
+                                                        onComplete={() => {
+                                                        // Aquí iniciamos el cronómetro solo cuando termina la animación
+                                                            if (isLastQuestion && !respuesta?.isSubmitted) {
+                                                                recordResponseTime("Iniciar", id, setAnswers);
+                                                            }
+                                                        }}/>
                                                     </p>
                                                     <div className="flex items-center justify-between mt-2">
                                                         <span className="block text-xs text-gray-400 mb-3">
@@ -434,16 +493,22 @@ function interviewChat() {
                                                         </div>
                                                         {isLastQuestion && !respuesta?.isSubmitted ? (
                                                             // Solo permite input en la última pregunta sin enviar
+                                                           
+                                                            
                                                             <div className="flex gap-2 items-center">
                                                                 <textarea
                                                                     rows={4}
                                                                     placeholder="Escribe tu respuesta aquí..."
                                                                     onChange={(e) => handleChange(e, id, categoria, 0)}
                                                                     value={respuesta?.textoRespuesta || ""}
+
                                                                     className="flex-1 bg-slate-500 rounded-xl p-3 text-white placeholder-slate-200 border-none resize-none focus:ring-2 focus:ring-white/20 focus:outline-none"
                                                                 />
                                                                 <button
-                                                                    onClick={() => handleSendResponseText(id)}
+                                                                    onClick={() => {
+                                                                        recordResponseTime("Detener", id, setAnswers);   // Se detiene el tiempo de respuesta para esa pregunta en particular
+                                                                        handleSendResponseText(id); 
+                                                                    }}
                                                                     className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors duration-200 text-white flex-shrink-0"
                                                                     title="Enviar respuesta"
                                                                 >
