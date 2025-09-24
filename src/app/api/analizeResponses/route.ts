@@ -243,13 +243,13 @@ TRABAJO BAJO PRESIÓN - 4 criterios (0.25 puntos cada uno):
 
 2. Evaluación de Tiempo (40% - Rúbrica fija)
 
-    0-20 segundos: 1.0
+    0-40 segundos: 1.0
 
-    21-40 segundos: 0.7
+    41-90 segundos: 0.7
 
-    41-60 segundos: 0.5
+    91-120 segundos: 0.5
 
-    61+ segundos: 0.4
+    121+ segundos: 0.4
 
 3. Fórmula Matemática Exacta
 text
