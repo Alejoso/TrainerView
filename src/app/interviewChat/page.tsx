@@ -197,38 +197,39 @@ function interviewChat() {
     };
 
 
-    // Preguntas por defecto para evitar gasto de tokens
-    const defaultQuestions = [
-        {
-            "id": 1,
-            "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
-            "tipoRespuesta": "texto"
-          },
-          {
-            "id": 2,
-            "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
-            "tipoRespuesta": "audio"
-          },
-          {
-            "id": 3,
-            "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
-            "tipoRespuesta": "texto"
-          }
-    ];
+    // // Preguntas por defecto para evitar gasto de tokens
+    // const defaultQuestions = [
+    //     {
+    //         "id": 1,
+    //         "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
+    //         "tipoRespuesta": "texto"
+    //       },
+    //       {
+    //         "id": 2,
+    //         "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
+    //         "tipoRespuesta": "audio"
+    //       },
+    //       {
+    //         "id": 3,
+    //         "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
+    //         "tipoRespuesta": "texto"
+    //       }
+    // ];
 
-    const [questions, SetQuestions] = useState<any[]>(defaultQuestions);
+    const [questions, SetQuestions] = useState<any[]>([]);
 
     // Nuevo estado para controlar la pregunta actual
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [loadingQuestions, setloadingQuestions] = useState(false);
 
     const generateQuestions = async () => {
-
+        setloadingQuestions(true);
         console.log("Generando preguntas...")
 
         try {
@@ -245,18 +246,18 @@ function interviewChat() {
             });
 
             const data = await res.json();
-
+            setloadingQuestions(false);
             if (!res.ok) {
                 toast.error(String(data.error));
             }
 
             if (res.ok) {
-                console.log(data);
-                SetQuestions(data);
+                SetQuestions(data.preguntas);
             }
         } catch (err: any) {
             console.log(err)
             toast.error(err || "Se produjo un error")
+            setloadingQuestions(false);
         }
     }
 
@@ -268,7 +269,7 @@ function interviewChat() {
     let responseTime: number = 0; // aquí guardamos el tiempo de respuesta para cada pregunta
 
     const timerIdRef = useRef<NodeJS.Timeout | null>(null);
-const startTimeRef = useRef<number>(0);
+    const startTimeRef = useRef<number>(0);
 
     const recordResponseTime = (
         modo: "Iniciar" | "Detener",
@@ -346,9 +347,10 @@ const startTimeRef = useRef<number>(0);
     //     generateQuestions(); 
     // } , []);
 
-
+    const [analyzing , setAnalyzing] = useState(false); 
     const handleFinish = async () => {
 
+        setAnalyzing(true); 
         console.log("Generando analisis...")
 
         try {
@@ -361,18 +363,21 @@ const startTimeRef = useRef<number>(0);
               });
 
               const data = await res.json(); 
+
+              setAnalyzing(false); 
               localStorage.setItem("analisis", JSON.stringify(data));
               router.push("/interviewChat/interviewAnalysis")
 
         } catch (err: any) {
             console.log(err)
             toast.error(err || "Se produjo un error")
+            setAnalyzing(false); 
         }
     }; 
 
    useEffect(() => {
         // Encuentra la pregunta activa
-        const activeQuestion = questions[currentQuestionIndex];
+        const activeQuestion = questions?.[currentQuestionIndex];
         const respuesta = answers.find(r => r.id === activeQuestion?.id);
 
         // Solo iniciar el cronómetro si la pregunta existe y no se ha enviado respuesta
@@ -384,7 +389,6 @@ const startTimeRef = useRef<number>(0);
 
     return (
         <div className="min-h-screen bg-zinc-900 text-white p-6">
-            <Toaster />
 
             <div className="max-w-3xl mx-auto space-y-6">
                 {/* Encabezado con datos del usuario */}
@@ -396,19 +400,46 @@ const startTimeRef = useRef<number>(0);
                         — {numberOfQuestions} preguntas
                     </p>
                 </div>
-
+            <div className="flex justify-center mb-4">
                 {/* Botón para generar preguntas */}
-                <div className="flex justify-center">
-                    <button
-                        onClick={generateQuestions}
-                        className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition font-medium shadow-md"
+                <button
+                    onClick={generateQuestions} // tu función
+                    disabled={loadingQuestions}     // evitas múltiples clicks
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-2 disabled:opacity-50"
                     >
-                        Generar preguntas
+                    {loadingQuestions ? (
+                        <>
+                        <svg
+                            className="animate-spin h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            />
+                            <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                            />
+                        </svg>
+                        Generando...
+                        </>
+                    ) : (
+                        "Generar Preguntas"
+                    )}
                     </button>
+            </div>
                 </div>
 
                 {/* Contenedor de la conversación */}
-                <div className="bg-zinc-800 border border-zinc-600 rounded-xl p-6 shadow-xl">
+                <div className="bg-zinc-800 border border-zinc-600 rounded-xl p-6 shadow-xl max-w-4xl mx-auto">
                     {/* Preguntas visibles hasta el índice actual */}
                     <div className="space-y-6">
                         {Array.isArray(questions) && questions.length > 0 ? (
@@ -591,16 +622,42 @@ const startTimeRef = useRef<number>(0);
                 </div>
 
                 {/* Botón para mostrar respuestas */}
-                <div className="flex justify-center">
-                    <button
-                        onClick={handleFinish}
-                        className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition font-medium shadow-md"
+                <div className="flex justify-center mt-4">
+                <button
+                    onClick={handleFinish}
+                    disabled={analyzing}
+                    className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition font-medium shadow-md flex items-center gap-2 disabled:opacity-50"
                     >
-                        Mostrar respuestas y preguntas
+                    {analyzing ? (
+                        <>
+                        <svg
+                            className="animate-spin h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            />
+                            <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                            />
+                        </svg>
+                        Analizando...
+                        </>
+                    ) : (
+                        "Analizar respuestas"
+                    )}
                     </button>
                 </div>
             </div>
-        </div>
     )
 }
 

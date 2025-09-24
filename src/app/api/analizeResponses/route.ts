@@ -3,151 +3,6 @@ import { NextResponse } from "next/server";
 import { dot, norm } from "mathjs";
 import { generateEmbeddings } from "../utils/generateEmbeddings";
 
-
-const preguntasEstandar = [
-  {
-    "id": 1,
-    "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 2,
-    "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 3,
-    "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 4,
-    "textoPregunta": "Describe una vez en la que ayudaste a resolver un conflicto dentro de un equipo.",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Facilité el diálogo entre las partes, escuchando activamente y proponiendo soluciones orientadas a restaurar la colaboración.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 5,
-    "textoPregunta": "¿Cómo reaccionas ante críticas constructivas?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Recibo las críticas constructivas con apertura, las analizo objetivamente y las uso como una oportunidad de mejora.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 6,
-    "textoPregunta": "Describe una situación en la que tuviste que manejar tus emociones en un entorno profesional.",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Gestioné mis emociones de forma consciente para mantener una actitud profesional y enfocada, a pesar de la tensión del momento.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 7,
-    "textoPregunta": "¿Cómo manejas los cambios inesperados en el trabajo?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Adapto mis planes rápidamente, reorganizo prioridades y mantengo una actitud flexible ante los cambios imprevistos.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 8,
-    "textoPregunta": "Cuéntame sobre una vez que tuviste que aprender algo nuevo rápidamente para cumplir con una tarea.",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Identifiqué lo esencial que debía aprender, consulté recursos adecuados y apliqué el conocimiento en el menor tiempo posible.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 9,
-    "textoPregunta": "¿Cómo abordas un problema cuando no tienes una solución inmediata?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Analizo la situación, recopilo información relevante, considero diversas alternativas y colaboro con otros si es necesario.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 10,
-    "textoPregunta": "¿Puedes contarme una experiencia donde tuviste que tomar una decisión difícil bajo presión?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Evalué la situación bajo presión, prioricé la información clave, consideré las consecuencias y tomé una decisión alineada con los objetivos.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 11,
-    "textoPregunta": "¿Cómo organizas tus prioridades cuando tienes múltiples tareas con fechas límite cercanas?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Establezco prioridades según urgencia e impacto, planifico el tiempo de forma eficiente y utilizo herramientas de organización si es necesario.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 12,
-    "textoPregunta": "¿Alguna vez perdiste una fecha de entrega? ¿Qué aprendiste de esa experiencia?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Reconocí el error, reflexioné sobre las causas y apliqué mejoras en mi organización personal para evitar que vuelva a ocurrir.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 13,
-    "textoPregunta": "¿Cómo demuestras empatía hacia tus compañeros de trabajo o clientes?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Escucho activamente, reconozco las emociones de los demás y respondo de forma considerada y respetuosa.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 14,
-    "textoPregunta": "Describe una ocasión en la que escuchar activamente marcó la diferencia en la resolución de un problema.",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Escuchar con atención permitió comprender la raíz del problema y facilitar una solución más efectiva y adecuada.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 15,
-    "textoPregunta": "¿Has liderado alguna vez un proyecto o equipo? ¿Qué aprendiste de esa experiencia?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "La experiencia de liderar me permitió desarrollar habilidades para motivar, delegar, tomar decisiones y comunicar de forma clara y efectiva.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 16,
-    "textoPregunta": "¿Cómo motivas a los demás cuando el ánimo del equipo está bajo?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Escucho sus preocupaciones, ofrezco apoyo emocional y enfoco al equipo en metas claras y alcanzables.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 17,
-    "textoPregunta": "¿Qué haces cuando identificas una oportunidad de mejora en tu entorno laboral?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Analizo la situación, propongo ideas de mejora viables y las comparto con las personas pertinentes para su implementación.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 18,
-    "textoPregunta": "Cuéntame sobre una vez en la que asumiste responsabilidades más allá de tu rol.",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Asumí tareas adicionales de manera proactiva cuando identifiqué una necesidad, contribuyendo al logro de los objetivos del grupo.",
-    "tipoRespuesta": "audio"
-  },
-  {
-    "id": 19,
-    "textoPregunta": "¿Has propuesto una idea nueva que fue implementada? ¿Cómo surgió esa idea?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Detecté una oportunidad de mejora, generé una propuesta innovadora y la presenté de forma estructurada hasta que fue implementada.",
-    "tipoRespuesta": "texto"
-  },
-  {
-    "id": 20,
-    "textoPregunta": "¿Cómo fomentas la creatividad en tu entorno de trabajo?",
-    "categoria": "habilidades blandas",
-    "respuestaIdeal": "Promuevo un entorno abierto a nuevas ideas, aliento la experimentación y valoro las contribuciones innovadoras de los demás.",
-    "tipoRespuesta": "audio"
-  }
-]
-; 
-
 export async function POST(request: Request) {
 
   interface Answer {
@@ -186,6 +41,8 @@ export async function POST(request: Request) {
       pregunta => pregunta.categoria === "habilidades blandas"
     );
     
+    let promedioHailidadesBlandas = 0; 
+    let contador = 0;
 
     // ---- Procesar respuestas del usuario con respuestas ideales generadas anteriormente ----
     for (const pregunta of habilidadesBlandas) {
@@ -195,13 +52,12 @@ export async function POST(request: Request) {
         const embeddingRespuesta = await generateEmbeddings(respuesta.textoRespuesta);
         const embeddingPregunta = await generateEmbeddings(pregunta.respuestaIdeal);
 
-        similitudesCoceno[pregunta.id] = cosineSimilarity(
-          embeddingRespuesta,
-          embeddingPregunta
-        );
-
+        promedioHailidadesBlandas += cosineSimilarity(embeddingRespuesta, embeddingPregunta); 
+        contador += 1;
       }
     }
+
+    promedioHailidadesBlandas = promedioHailidadesBlandas / contador; 
 
 
     const INSTRUCTION_PROMPT = `
@@ -290,17 +146,29 @@ Reglas de Salida:
 - NO incluyas explicaciones fuera del JSON.
 
 Ejemplo: 
+analisis: [
 {
   "Categoria": "Habilidades blandas",
   "puntuaciónGeneral": 0.4,
   "DetalleFeedback": "Las respuestas analizadas fueron demasiado breves, con menos de cinco palabras, lo que automáticamente invalida la evaluación de contenido según los criterios establecidos. Esto impidió evidenciar claridad, ejemplos concretos, autoconciencia o el uso de vocabulario profesional. El único factor que aportó a la puntuación fue el tiempo de respuesta (0 segundos), que según la rúbrica corresponde al máximo valor en tiempo. Sin embargo, la ausencia de desarrollo en las respuestas deja una calificación general baja. Recomendación: elaborar respuestas más extensas, con dos o más frases completas, ejemplos específicos y vocabulario profesional, lo que permitirá demostrar competencias comunicativas y autoconciencia de manera clara y evaluable."
+},
+{
+  "Categoria": "Habilidades técnicas",
+  "puntuaciónGeneral": 0.7,
+  "DetalleFeedback": "Las respuestas analizadas fueron demasiado breves..."
+},
+{
+  "Categoria": "Trabajo bajo presión",
+  "puntuaciónGeneral": 0.3,
+  "DetalleFeedback": "Las respuestas analizadas fueron demasiado breves..."
 }
+]
 
 A continuación te voy a mostrar un ejemplo de entrada: 
 const payload = {
   respuestas: [
     { id: 1, category: "Habilidades blandas", textoRespuesta: "Simon sloan", responseTime: 0, isSubmitted: true },
-    { id: 2, category: "Habilidades blandas", textoRespuesta: "Si sñor", responseTime: 0, isSubmitted: true },
+    { id: 2, category: "Habilidades blandas", textoRespuesta: "Si señor", responseTime: 0, isSubmitted: true },
     { id: 3, category: "Habilidades blandas", textoRespuesta: "Lider", responseTime: 0, isSubmitted: true }
   ],
   preguntas: [
@@ -336,7 +204,8 @@ Aquí vas a ignorar los campos de respuesta Ideal en las preguntas.
     
     const analisis = await evaluarParrafo(JSON.stringify({respuestas , preguntas})); 
 
-    return NextResponse.json({ analisis: analisis });
+    
+    return NextResponse.json({ analisis: analisis , promedioPreguntasBlandas: promedioHailidadesBlandas });
 
   } catch (error: any) {
     return NextResponse.json(
@@ -344,4 +213,5 @@ Aquí vas a ignorar los campos de respuesta Ideal en las preguntas.
       { status: 500 }
     );
   }
+  
 }
