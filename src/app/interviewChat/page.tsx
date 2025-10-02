@@ -216,31 +216,31 @@ function interviewChat() {
 
 
     // Preguntas por defecto para evitar gasto de tokens
-    const defaultQuestions = [
-        {
-            "id": 1,
-            "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
-            "tipoRespuesta": "audio"
-          },
-          {
-            "id": 2,
-            "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
-            "tipoRespuesta": "audio"
-          },
-          {
-            "id": 3,
-            "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
-            "categoria": "Habilidades blandas",
-            "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
-            "tipoRespuesta": "audio"
-          }
-    ];
+    // const defaultQuestions = [
+    //     {
+    //         "id": 1,
+    //         "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
+    //         "tipoRespuesta": "audio"
+    //       },
+    //       {
+    //         "id": 2,
+    //         "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
+    //         "tipoRespuesta": "audio"
+    //       },
+    //       {
+    //         "id": 3,
+    //         "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
+    //         "categoria": "Habilidades blandas",
+    //         "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
+    //         "tipoRespuesta": "audio"
+    //       }
+    // ];
 
-    const [questions, SetQuestions] = useState<any[]>([...defaultQuestions]);
+    const [questions, SetQuestions] = useState<any[]>([]);
 
     
     // Nuevo estado para controlar la pregunta actual
