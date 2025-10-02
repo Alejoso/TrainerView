@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
+import { q } from "framer-motion/client";
 
 // Componente para efecto de typing
 function TypingText({ text, speed = 50, onComplete}: { text: string; speed?: number ; onComplete?: () => void; }) {
@@ -17,11 +18,11 @@ function TypingText({ text, speed = 50, onComplete}: { text: string; speed?: num
             }, speed);
 
             return () => clearTimeout(timer);
-        } else {
-            // Cuando termina de escribir todo
-            if (onComplete) onComplete();
+        } else if (currentIndex === text.length && onComplete) {
+            // Solo ejecutar onComplete cuando termine de escribir
+            onComplete();
         }
-    }, [currentIndex, text, speed]);
+    }, [currentIndex, text, speed, onComplete]);
 
     // Resetear cuando cambia el texto
     useEffect(() => {
@@ -196,37 +197,58 @@ function interviewChat() {
         return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     };
 
+    // Función para cambiar el tipo de respuesta de audio a texto
+    const handleChangeToTextResponse = (questionId: string) => {
+        // NO detener el cronómetro, solo cambiar el tipo de respuesta
+        // El cronómetro debe seguir contando desde donde estaba
+        
+        // Cambiar el tipo de respuesta de TODAS las preguntas que sean audio a texto
+        SetQuestions(prevQuestions => 
+            prevQuestions.map(q => 
+                q.tipoRespuesta === "audio" 
+                    ? { ...q, tipoRespuesta: "texto" }
+                    : q
+            )
+        );
+        
+        toast.success("Todas las preguntas de audio cambiadas a texto");
+    };
 
-    // // Preguntas por defecto para evitar gasto de tokens
-    // const defaultQuestions = [
-    //     {
-    //         "id": 1,
-    //         "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
-    //         "categoria": "Habilidades blandas",
-    //         "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
-    //         "tipoRespuesta": "texto"
-    //       },
-    //       {
-    //         "id": 2,
-    //         "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
-    //         "categoria": "Habilidades blandas",
-    //         "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
-    //         "tipoRespuesta": "audio"
-    //       },
-    //       {
-    //         "id": 3,
-    //         "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
-    //         "categoria": "Habilidades blandas",
-    //         "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
-    //         "tipoRespuesta": "texto"
-    //       }
-    // ];
 
-    const [questions, SetQuestions] = useState<any[]>([]);
+    // Preguntas por defecto para evitar gasto de tokens
+    const defaultQuestions = [
+        {
+            "id": 1,
+            "textoPregunta": "¿Cómo te aseguras de que tu mensaje sea comprendido correctamente por los demás?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Verifico que el mensaje haya sido entendido correctamente utilizando retroalimentación, reformulaciones y adaptando el lenguaje al interlocutor.",
+            "tipoRespuesta": "audio"
+          },
+          {
+            "id": 2,
+            "textoPregunta": "Describe una situación en la que tuviste que comunicar una idea difícil. ¿Cómo lo manejaste?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Preparé el mensaje con anticipación, utilicé un enfoque empático y aseguré un entorno adecuado para facilitar una comunicación efectiva.",
+            "tipoRespuesta": "audio"
+          },
+          {
+            "id": 3,
+            "textoPregunta": "¿Qué papel sueles tomar cuando trabajas en equipo?",
+            "categoria": "Habilidades blandas",
+            "respuestaIdeal": "Asumo el rol que sea necesario para el equipo, ya sea liderar, colaborar o apoyar, con el fin de alcanzar los objetivos comunes.",
+            "tipoRespuesta": "audio"
+          }
+    ];
 
+    const [questions, SetQuestions] = useState<any[]>([...defaultQuestions]);
+
+    
     // Nuevo estado para controlar la pregunta actual
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [loadingQuestions, setloadingQuestions] = useState(false);
+    
+    // Estado para controlar si ya se inició el cronómetro para cada pregunta
+    const [timerStarted, setTimerStarted] = useState<Set<string>>(new Set());
 
     const generateQuestions = async () => {
         setloadingQuestions(true);
@@ -375,18 +397,6 @@ function interviewChat() {
         }
     }; 
 
-   useEffect(() => {
-        // Encuentra la pregunta activa
-        const activeQuestion = questions?.[currentQuestionIndex];
-        const respuesta = answers.find(r => r.id === activeQuestion?.id);
-
-        // Solo iniciar el cronómetro si la pregunta existe y no se ha enviado respuesta
-        if (activeQuestion && (!respuesta || !respuesta.isSubmitted)) {
-            recordResponseTime("Iniciar", activeQuestion.id, setAnswers);
-        }
-    }, [currentQuestionIndex, questions]);
-
-
     return (
         <div className="min-h-screen bg-zinc-900 text-white p-6">
 
@@ -486,9 +496,10 @@ function interviewChat() {
                                                     <p className="text-gray-200 leading-relaxed">
                                                         <TypingText text={textoPregunta} speed={50} 
                                                         onComplete={() => {
-                                                        // Aquí iniciamos el cronómetro solo cuando termina la animación
-                                                            if (isLastQuestion && !respuesta?.isSubmitted) {
+                                                        // Iniciar el cronómetro cuando termine la animación tanto para texto como para audio
+                                                            if (isLastQuestion && !respuesta?.isSubmitted && !timerStarted.has(id)) {
                                                                 recordResponseTime("Iniciar", id, setAnswers);
+                                                                setTimerStarted(prev => new Set(prev).add(id));
                                                             }
                                                         }}/>
                                                     </p>
@@ -561,27 +572,58 @@ function interviewChat() {
                                                     // Respuesta de audio
                                                     <div className="flex items-center justify-center">
                                                         {isLastQuestion && !respuesta?.isSubmitted ? (
-                                                            // Solo permite audio en la última pregunta sin enviar
-                                                            <button
-                                                                onClick={() => handleSendResponseAudio(id)}
-                                                                className={`p-4 rounded-full transition-colors duration-200 text-white ${recording && currentRecordingQuestionId === id
-                                                                    ? 'bg-red-600 hover:bg-red-700 animate-pulse'
-                                                                    : 'bg-blue-600 hover:bg-blue-700'
-                                                                    }`}
-                                                                title={recording && currentRecordingQuestionId === id ? "Detener grabación" : "Grabar respuesta de audio"}
-                                                            >
-                                                                <svg
-                                                                    width="24"
-                                                                    height="24"
-                                                                    viewBox="0 0 24 24"
-                                                                    fill="currentColor"
+                                                            // Permite la opcion de responder con audio o boton de "En este momento no puedo"
+                                                            <div className="flex gap-3 items-center">
+                                                                <button
+                                                                    onClick={() => handleSendResponseAudio(id)}
+                                                                    className={`p-4 rounded-full transition-colors duration-200 text-white ${recording && currentRecordingQuestionId === id
+                                                                        ? 'bg-red-600 hover:bg-red-700 animate-pulse'
+                                                                        : 'bg-blue-600 hover:bg-blue-700'
+                                                                        }`}
+                                                                    title={recording && currentRecordingQuestionId === id ? "Detener grabación" : "Grabar respuesta de audio"}
                                                                 >
-                                                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                                                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                                                                    <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" strokeWidth="2" />
-                                                                    <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" strokeWidth="2" />
-                                                                </svg>
-                                                            </button>
+                                                                    <svg
+                                                                        width="24"
+                                                                        height="24"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="currentColor"
+                                                                    >
+                                                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                                                        <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" strokeWidth="2" />
+                                                                        <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" strokeWidth="2" />
+                                                                    </svg>
+                                                                </button>
+
+                                                                <button
+                                                                    className="px-4 py-2 bg-blue-600 text-white placeholder-slate-200 border-none text-white text-xs rounded-lg transition-colors duration-200 flex items-center gap-2"
+                                                                    title="Cambiar a respuesta por texto"
+                                                                    onClick={() => handleChangeToTextResponse(id)}
+                                                                >
+                                                                    <svg
+                                                                        width="24"
+                                                                        height="24"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="2"
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                    >
+                                                                        {/* Micrófono */}
+                                                                        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+                                                                        <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+                                                                        <line x1="12" y1="18" x2="12" y2="22" />
+                                                                        <line x1="8" y1="22" x2="16" y2="22" />
+                                                                        
+                                                                        {/* Círculo tachado */}
+                                                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                                                                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" strokeWidth="2" />
+                                                                    </svg>
+
+                                                                    Responder con texto
+                                                                </button>
+                                                            </div>
                                                         ) : respuesta?.isSubmitted ? (
                                                             // Audio ya respondido con transcripción
                                                             <div className="bg-slate-600 rounded-2xl rounded-tr-sm p-4 shadow-lg">
