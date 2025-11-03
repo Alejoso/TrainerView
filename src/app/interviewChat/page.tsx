@@ -228,6 +228,7 @@ function InterviewChat() {
 
             if (res.ok) {
                 SetQuestions(data.preguntas);
+                localStorage.setItem("preguntas", JSON.stringify(data.preguntas));
             }
         } catch (err: any) {
             console.log(err)
@@ -312,6 +313,8 @@ function InterviewChat() {
 
         try {
             console.log(answers , questions); 
+
+            localStorage.setItem("respuestas" , JSON.stringify(answers)); 
             const res = await fetch("/api/analizeResponses", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -419,18 +422,6 @@ function InterviewChat() {
             <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-cyan-400/10 rounded-full blur-3xl"></div>
             <div className="absolute top-1/3 left-2/3 w-48 h-48 bg-indigo-400/5 rounded-full blur-3xl"></div>
 
-            <Toaster 
-                position="top-right"
-                toastOptions={{
-                    className: 'bg-white/10 backdrop-blur-md text-white border border-white/20',
-                    style: {
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        backdropFilter: 'blur(12px)',
-                        color: 'white',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                    },
-                }}
-            />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}

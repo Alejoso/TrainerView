@@ -1,5 +1,5 @@
 "use client"; 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -94,24 +94,15 @@ function RingChart({ percentage, size = 120, strokeWidth = 12, showPercentage = 
   );
 }
 
+
+
 function InterviewAnalysis() {
   const [categorias, setCategorias] = useState<AnalysisData | null>(null);
   const [promedioBlandas, setPromedioBlandas] = useState<number>(0);
   const router = useRouter();
 
-  useEffect(() => {
-    const storedAnalisis = localStorage.getItem("analisis");
-    if (storedAnalisis) {
-      try {
-        const parsed = JSON.parse(storedAnalisis);
-        const categoriasParsed = JSON.parse(parsed.analisis);
-        setCategorias(categoriasParsed.analisis || categoriasParsed);
-        setPromedioBlandas(parsed.promedioPreguntasBlandas || 0);
-      } catch (error) {
-        console.error("Error parseando el análisis:", error);
-      }
-    }
-  }, []);
+  const [dataInserted, setdataInserted] = useState<boolean>(false);
+
 
   const calcularPorcentajeFinal = (categoria: CategoriaData): number => {
     if (categoria.Categoria.toLowerCase() === "habilidades blandas") {
@@ -125,6 +116,94 @@ function InterviewAnalysis() {
     const total = categorias.reduce((sum, cat) => sum + calcularPorcentajeFinal(cat), 0);
     return Math.round(total / categorias.length);
   };
+
+  useEffect(() => {
+
+
+    const storedAnalisis = localStorage.getItem("analisis");
+
+    if (storedAnalisis) {
+      try {
+        const parsed = JSON.parse(storedAnalisis);
+        const categoriasParsed = JSON.parse(parsed.analisis);
+        setCategorias(categoriasParsed.analisis || categoriasParsed);
+        setPromedioBlandas(parsed.promedioPreguntasBlandas || 0);
+      } catch (error) {
+        console.error("Error parseando el análisis:", error);
+      }
+    }
+  }, []);
+
+  if (!categorias) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
+        <div className="text-white text-xl backdrop-blur-sm bg-white/10 rounded-2xl p-8">Cargando análisis...</div>
+      </div>
+    );
+  }
+
+  const promedioGeneral = calcularPromedioGeneral(categorias);
+
+
+  async function insertDataBase() {
+    try {
+      const analisis_entrada = JSON.parse(localStorage.getItem("analisis") || "{}"); 
+      const preguntas_entrada = JSON.parse(localStorage.getItem("preguntas") || "{}" )
+      const respuestas_entrada = JSON.parse(localStorage.getItem("respuestas") || "{}" )
+      const trabajo = localStorage.getItem("userJob"); 
+
+      if (analisis_entrada === "{}" || preguntas_entrada === "{}" || respuestas_entrada === "{}")
+      {
+        console.log("Error, campos vacios");
+        return; 
+      }
+
+      const promedio = promedioGeneral; 
+
+      const habilidadesBlandas = categorias!.find(
+        (c) => c.Categoria.toLowerCase() === "habilidades blandas"
+      );
+
+      const trabajoBajoPresion = categorias!.find(
+        (c) => c.Categoria.toLowerCase() === "trabajo bajo presión"
+      );
+
+      const habilidadesTecnicas = categorias!.find(
+        (c) => c.Categoria.toLowerCase() === "habilidades técnicas"
+      );
+
+      const hB = calcularPorcentajeFinal(habilidadesBlandas!);
+      const tP = calcularPorcentajeFinal(trabajoBajoPresion!); 
+      const hT = calcularPorcentajeFinal(habilidadesTecnicas!);
+
+      const date = new Date(); 
+
+      await fetch("/api/InsertInterview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analisis_entrada, preguntas_entrada, respuestas_entrada , date,  promedio, hB, tP, hT , trabajo}),
+      });
+
+
+    }
+    catch(error:any)
+    {
+      console.log(error); 
+    }
+  }
+
+  // if (typeof window !== "undefined" && !sessionStorage.getItem("inserted")) {
+  //   insertDataBase();
+  //   sessionStorage.setItem("inserted", "true");
+  //   console.log("Se incerto yuppi");
+  // }
+
+  if (typeof window !== "undefined" && dataInserted === false) {
+    insertDataBase();
+    console.log("Se incerto yuppi");
+    setdataInserted(true); 
+  }
+
 
   // Nodos para el fondo de análisis (patrón diferente)
   const analysisNodes = [
@@ -146,16 +225,6 @@ function InterviewAnalysis() {
     { from: 17, to: 18 }, { from: 18, to: 19 }, { from: 19, to: 20 },
     { from: 1, to: 11 }, { from: 5, to: 15 }, { from: 10, to: 20 }
   ];
-
-  if (!categorias) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-        <div className="text-white text-xl backdrop-blur-sm bg-white/10 rounded-2xl p-8">Cargando análisis...</div>
-      </div>
-    );
-  }
-
-  const promedioGeneral = calcularPromedioGeneral(categorias);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
