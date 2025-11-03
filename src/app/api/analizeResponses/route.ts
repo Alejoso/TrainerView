@@ -1,7 +1,22 @@
 import openai from "../utils/openAI";
+import dbConnect from "../utils/connectDB";
+import Item from "../utils/Item";  
 import { NextResponse } from "next/server";
 import { dot, norm } from "mathjs";
 import { generateEmbeddings } from "../utils/generateEmbeddings";
+
+async function insertDara(req:any) {
+  await dbConnect();
+
+    try { 
+      const item = await Item.create(req.body);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Error en en la base de datos" },
+        { status: 400 }
+      );
+    }
+}
 
 export async function POST(request: Request) {
 
