@@ -451,7 +451,7 @@ function InterviewChat() {
                         </svg>
                     </div>
                     <h1 className="text-3xl font-light text-white mb-2">
-                        Entrevista Neural
+                        Trainer View
                     </h1>
                     <div className="flex items-center justify-center gap-4 text-slate-300 text-sm">
                         <span><strong className="text-cyan-400">{userName}</strong></span>
