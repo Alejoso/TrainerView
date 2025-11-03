@@ -487,13 +487,24 @@ function InterviewChat() {
                     </motion.button>
                 </motion.div>
 
-                {/* Contenedor del chat con efecto glass */}
+                {/* Contenedor del chat con efecto glass - SIN BARRAS LATERALES */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                     className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 max-h-[70vh] overflow-y-auto"
+                    style={{ 
+                        scrollbarWidth: 'none', /* Firefox */
+                        msOverflowStyle: 'none', /* IE and Edge */
+                    }}
                 >
+                    {/* Estilo para ocultar scrollbar en Chrome, Safari y Opera */}
+                    <style jsx>{`
+                        .overflow-y-auto::-webkit-scrollbar {
+                            display: none;
+                        }
+                    `}</style>
+                    
                     <div className="space-y-6">
                         {Array.isArray(questions) && questions.length > 0 ? (
                             questions.slice(0, currentQuestionIndex + 1).map((question, index) => {
