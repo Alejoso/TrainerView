@@ -305,7 +305,7 @@ function QuestionsQuantity() {
                         </motion.button>
                     </motion.form>
                 </motion.div>
-                {/*Minnor change*/}
+                {/*Minnor changes*/}
 
                 {/* Footer */}
                 <motion.div
