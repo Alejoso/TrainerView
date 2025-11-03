@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 
 function HomePage() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ function HomePage() {
   }); 
 
   const router = useRouter(); 
+
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
