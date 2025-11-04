@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "chart.js": "^4.5.0",
+    "dom-to-image-more": "^3.7.2",
     "framer-motion": "^12.23.12",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "mongoose": "^8.19.2",
     "next": "15.5.2",
     "openai": "^5.19.1",

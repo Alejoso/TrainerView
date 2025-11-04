@@ -2,6 +2,8 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 
 interface CategoriaData {
   Categoria: string;
@@ -144,6 +146,75 @@ function InterviewAnalysis() {
 
   const promedioGeneral = calcularPromedioGeneral(categorias);
 
+  // Función para descargar la vista como PDF
+  const downloadAsPDF = async () => {
+    const element = document.getElementById('analysis-content');
+    if (!element) {
+      alert('No se pudo encontrar el contenido');
+      return;
+    }
+
+    try {
+      // Crear elemento de notificación
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all';
+      toast.textContent = 'Generando PDF...';
+      document.body.appendChild(toast);
+
+      // Ocultar elementos que no queremos en el PDF
+      const elementsToHide = document.querySelectorAll('.no-pdf');
+      elementsToHide.forEach((el: Element) => {
+        (el as HTMLElement).style.display = 'none';
+      });
+
+      // Esperar para que las animaciones terminen
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Capturar el elemento como imagen PNG
+      const dataUrl = await toPng(element, {
+        quality: 1.0,
+        pixelRatio: 2, // Alta calidad
+        backgroundColor: '#0f172a', // Fondo slate-900
+      });
+
+      // Restaurar elementos ocultos
+      elementsToHide.forEach((el: Element) => {
+        (el as HTMLElement).style.display = '';
+      });
+
+      // Crear imagen para obtener dimensiones
+      const img = new Image();
+      img.src = dataUrl;
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      // Crear PDF
+      const pdf = new jsPDF({
+        orientation: img.width > img.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [img.width, img.height]
+      });
+
+      // Agregar la imagen al PDF
+      pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
+
+      // Guardar el PDF
+      const userJob = localStorage.getItem('userJob')|| "Trabajo";
+      const fecha = new Date().toISOString().split('T')[0];
+      pdf.save(`Análisis-${userJob.replace(/\s+/g, '-')}-${fecha}.pdf`);
+
+      // Actualizar notificación
+      toast.textContent = '✓ PDF descargado correctamente';
+      toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all';
+      setTimeout(() => toast.remove(), 2000);
+
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+      alert('Error al generar el PDF. Por favor intenta de nuevo.');
+    }
+  };
 
   async function insertDataBase() {
     try {
@@ -228,8 +299,9 @@ function InterviewAnalysis() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-      {/* Fondo neural para análisis */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-800"></div>
+      <div id="analysis-content" className="w-full min-h-screen flex items-center justify-center p-4">
+        {/* Fondo neural para análisis */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-800"></div>
       
       {/* Red neuronal específica para análisis */}
       <div className="absolute inset-0">
@@ -325,6 +397,9 @@ function InterviewAnalysis() {
             <div className="text-left">
               <h1 className="text-4xl font-light text-white mb-2">Análisis de Entrevista</h1>
               <h3 className="text-2xl font-semibold text-emerald-400 mb-2">Resultados Detallados</h3>
+              <p className="text-slate-300">Trabajo: {localStorage.getItem("userJob")}</p>
+              <p className="text-slate-300">Fecha: {new Date().toISOString().split('T')[0]}</p>
+              
               <p className="text-slate-300">
                 Evaluación basada en {categorias.length} categoría{categorias.length !== 1 ? "s" : ""} de competencia
               </p>
@@ -411,21 +486,21 @@ function InterviewAnalysis() {
           <h3 className="text-lg font-semibold text-white mb-6 text-center">Escala de Evaluación</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-red-500/10 rounded-2xl border border-red-500/20">
-              <div className="w-8 h-8 bg-red-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+              <div className="w-13 h-13 bg-red-500 rounded-full mx-auto mb-3 flex items-center justify-center">
                 <span className="text-white text-sm font-bold">0-59</span>
               </div>
               <span className="text-sm text-red-300 font-semibold block mb-1">En Desarrollo</span>
               <p className="text-xs text-red-200">Oportunidad de mejora</p>
             </div>
             <div className="text-center p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+              <div className="w-13 h-13 bg-yellow-500 rounded-full mx-auto mb-3 flex items-center justify-center">
                 <span className="text-white text-sm font-bold">60-79</span>
               </div>
               <span className="text-sm text-yellow-300 font-semibold block mb-1">Competente</span>
               <p className="text-xs text-yellow-200">Nivel satisfactorio</p>
             </div>
             <div className="text-center p-4 bg-green-500/10 rounded-2xl border border-green-500/20">
-              <div className="w-8 h-8 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+              <div className="w-13 h-13 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
                 <span className="text-white text-sm font-bold">80-100</span>
               </div>
               <span className="text-sm text-green-300 font-semibold block mb-1">Destacado</span>
@@ -433,10 +508,10 @@ function InterviewAnalysis() {
             </div>
           </div>
         </motion.div>
-
+      
         {/* Botón de acción */}
         <motion.div 
-          className="text-center"
+          className="text-center flex justify-center no-pdf"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.5 }}
@@ -445,12 +520,24 @@ function InterviewAnalysis() {
             onClick={() => router.back()}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3 mx-auto"
+            className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Volver a la Entrevista
+          </motion.button>
+
+          <motion.button
+            onClick={downloadAsPDF}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gradient-to-r ml-5 from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Descargar en PDF
           </motion.button>
         </motion.div>
 
@@ -459,11 +546,15 @@ function InterviewAnalysis() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4, duration: 0.5 }}
-          className="text-center mt-8 text-slate-400 text-sm"
+          className="text-center mt-8 text-slate-400 text-sm no-pdf"
         >
           <p>Universidad Eafit @ Simón Sloan</p>
         </motion.div>
       </motion.div>
+      </div>
+
+
+      
     </div>
   );
 }
