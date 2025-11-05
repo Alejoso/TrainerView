@@ -42,11 +42,24 @@ function InterviewChat() {
     const [userName, setUserName] = useState<string | null>(null);
     const [userJob, setUserJob] = useState<string | null>(null);
     const [numberOfQuestions, setNumberOfQuestions] = useState<string | null>(null);
+    const [habilidadesUsuario, setHabilidadesUsuario] = useState<any>(null);
 
     useEffect(() => {
         setUserName(localStorage.getItem("userName"));
         setUserJob(localStorage.getItem("userJob"));
         setNumberOfQuestions(localStorage.getItem("numberOfQuestions"));
+       
+        const habilidadesGuardadas = localStorage.getItem("habilidadesUsuario");
+        if (habilidadesGuardadas) {
+            try {
+                setHabilidadesUsuario(JSON.parse(habilidadesGuardadas));
+                console.log(" Habilidades cargadas:", JSON.parse(habilidadesGuardadas));
+            } catch (error) {
+                console.error(" Error parseando habilidades:", error);
+            }
+        } else {
+            console.warn(" No se encontraron habilidades en localStorage");
+        }
     }, []);
 
     const [answers, setAnswers] = useState<
@@ -206,7 +219,15 @@ function InterviewChat() {
     const generateQuestions = async () => {
         setloadingQuestions(true);
         console.log("Generando preguntas...")
-
+        console.log("Enviando a GPT:", {
+            userName,
+            userJob, 
+            numberOfQuestions,
+            HabilidadesUsuario: {
+                habilidadesTecnicas: habilidadesUsuario?.habilidadesTecnicas,
+                habilidadesPresion: habilidadesUsuario?.habilidadesPresion
+            }
+        });
         try {
             const res = await fetch("api/gpt", {
                 method: "POST",
@@ -217,6 +238,10 @@ function InterviewChat() {
                     userName: userName,
                     userJob: userJob,
                     numberOfQuestions: numberOfQuestions,
+                    HabilidadesUsuario: {   
+                    habilidadesTecnicas: habilidadesUsuario?.habilidadesTecnicas || "",
+                    habilidadesPresion: habilidadesUsuario?.habilidadesPresion || ""
+                }
                 })
             });
 
