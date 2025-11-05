@@ -22,6 +22,12 @@ export default function Habilities() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); 
+        const habilidadesData ={
+            habilidadesComunicacion : formData.comunication, 
+            habilidadesPresion: formData.underPreassure, 
+            habilidadesTecnicas : formData.technical, 
+        }
+        localStorage.setItem("habilidadesUsuario", JSON.stringify(habilidadesData))
         await new Promise(resolve => setTimeout(resolve, 800));
         router.push("/questions");
     }; 

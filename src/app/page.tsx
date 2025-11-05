@@ -1,332 +1,561 @@
+// app/promotion/page.tsx
 "use client";
-import React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
-function HomePage() {
-  const [formData, setFormData] = useState({
-    userName: '',
-    userJob: '',
-  }); 
+export default function PromotionPage() {
+  const [currentSection, setCurrentSection] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const router = useRouter(); 
-
-  
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev, 
-      [name]: value,
-    })); 
+  // Colores de Trainerview 
+  const trainerviewColors = {
+    primary: '#0f172a',     // slate-900
+    secondary: '#1e293b',   // slate-800
+    accent: '#2563eb',      // blue-600
+    highlight: '#06b6d4',   // cyan-500
+    light: '#f8fafc'        // slate-50
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
-
-    if(formData.userJob.trim() === "" || formData.userName.trim() === "") {
-      toast.error("Debes llenar todos los campos");
-    } else {
-      localStorage.setItem("userName", formData.userName.trim());
-      localStorage.setItem("userJob", formData.userJob.trim());
-      router.push("/habilities");
+  const sections = [
+    {
+      id: 'hero',
+      title: 'TRAINERVIEW',
+      subtitle: 'ENTREVISTAS TÉCNICAS CON IA',
+      description: 'Domina tus entrevistas técnicas con simulacros realistas y feedback instantáneo impulsado por IA',
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+      number: '01'
+    },
+    {
+      id: 'problem',
+      title: 'EL DESAFÍO',
+      subtitle: 'PREPARACIÓN INEFECTIVA',
+      description: 'La práctica tradicional no prepara para entrevistas técnicas reales con preguntas específicas y feedback relevante',
+      background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)',
+      number: '02'
+    },
+    {
+      id: 'solution',
+      title: 'LA SOLUCIÓN',
+      subtitle: 'PRÁCTICA INTELIGENTE',
+      description: 'Entrenamiento personalizado con IA que simula entrevistas reales y proporciona análisis detallado',
+      background: 'linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%)',
+      number: '03'
+    },
+    {
+      id: 'demo',
+      title: 'EXPERIMENTA',
+      subtitle: 'INTERFAZ INMERSIVA',
+      description: 'Chat interactivo con IA que guía tu preparación como un entrevistador real',
+      background: 'linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%)',
+      number: '04'
+    },
+    {
+      id: 'start',
+      title: 'COMIENZA',
+      subtitle: 'GRATIS Y ACCESIBLE',
+      description: 'Únete a miles de desarrolladores que están transformando sus carreras con TrainerView',
+      background: 'linear-gradient(135deg, #64748b 0%, #475569 50%, #0f172a 100%)',
+      number: '05'
     }
-  }; 
-
-  // Nodos para la red neuronal
-  const neuralNodes = [
-    { id: 1, x: 10, y: 20 },
-    { id: 2, x: 25, y: 40 },
-    { id: 3, x: 40, y: 15 },
-    { id: 4, x: 60, y: 35 },
-    { id: 5, x: 75, y: 25 },
-    { id: 6, x: 90, y: 45 },
-    { id: 7, x: 15, y: 60 },
-    { id: 8, x: 35, y: 75 },
-    { id: 9, x: 55, y: 55 },
-    { id: 10, x: 80, y: 65 },
-    { id: 11, x: 45, y: 85 },
-    { id: 12, x: 70, y: 90 },
   ];
 
-  // Conexiones entre nodos
-  const neuralConnections = [
-    { from: 1, to: 2 }, { from: 1, to: 3 }, { from: 2, to: 4 },
-    { from: 3, to: 4 }, { from: 4, to: 5 }, { from: 4, to: 6 },
-    { from: 5, to: 6 }, { from: 1, to: 7 }, { from: 7, to: 8 },
-    { from: 8, to: 9 }, { from: 9, to: 10 }, { from: 9, to: 11 },
-    { from: 10, to: 12 }, { from: 11, to: 12 }, { from: 3, to: 9 },
-    { from: 6, to: 10 }, { from: 2, to: 7 }, { from: 5, to: 11 },
-  ];
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = Math.sign(e.deltaY);
+      const newSection = Math.max(0, Math.min(sections.length - 1, currentSection + delta));
+      setCurrentSection(newSection);
+    };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-      {/* Fondo base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/40 to-slate-800"></div>
-      
-      {/* Red neuronal - Conexiones con tonos azules */}
-      <div className="absolute inset-0">
-        <svg className="w-full h-full opacity-40">
-          {neuralConnections.map((connection, index) => {
-            const fromNode = neuralNodes.find(node => node.id === connection.from);
-            const toNode = neuralNodes.find(node => node.id === connection.to);
-            
-            if (!fromNode || !toNode) return null;
-            
-            return (
-              <motion.line
-                key={index}
-                x1={`${fromNode.x}%`}
-                y1={`${fromNode.y}%`}
-                x2={`${toNode.x}%`}
-                y2={`${toNode.y}%`}
-                stroke="url(#neuralGradient)"
-                strokeWidth="0.5"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ 
-                  pathLength: 1, 
-                  opacity: [0.3, 0.6, 0.3] 
-                }}
-                transition={{
-                  pathLength: { duration: 2, delay: index * 0.1 },
-                  opacity: { duration: 3, repeat: Infinity, delay: index * 0.1 }
-                }}
-              />
-            );
-          })}
-          
-          {/* Gradiente azul para las conexiones */}
-          <defs>
-            <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.6" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        setCurrentSection(prev => Math.min(sections.length - 1, prev + 1));
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setCurrentSection(prev => Math.max(0, prev - 1));
+      }
+    };
 
-      {/* Nodos neuronales animados - Azules */}
-      <div className="absolute inset-0">
-        {neuralNodes.map((node) => (
-          <motion.div
-            key={node.id}
-            className="absolute w-3 h-3 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50"
-            style={{
-              left: `${node.x}%`,
-              top: `${node.y}%`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.4, 0.8, 0.4],
-              boxShadow: [
-                '0 0 10px rgba(59, 130, 246, 0.3)',
-                '0 0 20px rgba(59, 130, 246, 0.6)',
-                '0 0 10px rgba(59, 130, 246, 0.3)'
-              ]
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2
-            }}
-          />
-        ))}
-      </div>
+    sectionsRef.current[currentSection]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center'
+    });
 
-      {/* Impulsos de datos viajando por las conexiones - Azules */}
-      <div className="absolute inset-0">
-        {neuralConnections.map((connection, index) => {
-          const fromNode = neuralNodes.find(node => node.id === connection.from);
-          const toNode = neuralNodes.find(node => node.id === connection.to);
-          
-          if (!fromNode || !toNode) return null;
-          
-          return (
-            <motion.div
-              key={`pulse-${index}`}
-              className="absolute w-2 h-2 bg-blue-300 rounded-full shadow-lg shadow-blue-300"
-              style={{
-                left: `${fromNode.x}%`,
-                top: `${fromNode.y}%`,
-              }}
-              animate={{
-                left: [`${fromNode.x}%`, `${toNode.x}%`],
-                top: [`${fromNode.y}%`, `${toNode.y}%`],
-                opacity: [0, 1, 0]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-                ease: "linear"
-              }}
-            />
-          );
-        })}
-      </div>
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+    
+    setTimeout(() => setIsLoading(false), 1000);
 
-      {/* Efectos de luz ambientales - Azules */}
-      <div className="absolute top-1/4 -left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 -right-10 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentSection]);
 
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          className: 'bg-white/10 backdrop-blur-md text-white border border-white/20',
-          style: {
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px)',
-            color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          },
-        }}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-md relative z-10"
-      >
-        {/* Header minimalista */}
+  // Navbar que coincide con la app
+  const TrainerViewNavbar = () => (
+    <motion.nav
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 1, delay: 0.5 }}
+      className="fixed top-0 w-full z-50 px-8 py-6"
+    >
+      <div className="flex justify-between items-center">
+        {/* Logo de TrainerView */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-12"
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center space-x-3 cursor-pointer"
         >
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/25">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c.5.5.759 1.187.704 1.877M5 14.5L3.697 16.78a2.25 2.25 0 01-.704 1.877" />
-            </svg>
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <span className="text-white font-bold text-sm">TV</span>
           </div>
-          <h1 className="text-5xl font-light text-white mb-4">
-            Trainer View
-          </h1>
-          <p className="text-slate-300 text-lg">
-            Tu agentic de confianza 
-          </p>
+          <span className="text-white font-semibold text-lg bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            TrainerView
+          </span>
         </motion.div>
 
-        {/* Card principal con efecto glass */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8"
-        >
-          <motion.form
-            onSubmit={onSubmit}
-            className="flex flex-col gap-6"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.15,
-                },
-              },
-            }}
-          >
-            {/* Campo Nombre */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              className="flex flex-col"
-            >
-              <label htmlFor="userName" className="text-sm font-medium text-slate-300 mb-3">
-                Nombre
-              </label>
-              <input
-                id="userName"
-                type="text"
-                placeholder="Tu nombre completo"
-                name="userName"
-                value={formData.userName}
-                onChange={handleChange}
-                className="px-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 placeholder-slate-400 text-white backdrop-blur-sm"
-              />
-            </motion.div>
-
-            {/* Campo Trabajo Soñado */}
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              className="flex flex-col"
-            >
-              <label htmlFor="userJob" className="text-sm font-medium text-slate-300 mb-3">
-                Aspiración profesional
-              </label> 
-              <input
-                id="userJob"
-                type="text"
-                placeholder="Ej: Ingeniero de machine learning"
-                name="userJob"
-                value={formData.userJob}
-                onChange={handleChange}
-                className="px-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 placeholder-slate-400 text-white backdrop-blur-sm"
-              />
-            </motion.div>
-
-            {/* Indicador de progreso */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center justify-center gap-3 text-slate-400 text-sm"
-            >
-              <div className="flex items-center gap-2">
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-2 h-2 bg-blue-400 rounded-full"
-                />
-                <span>Inicializando red neuronal...</span>
-              </div>
-            </motion.div>
-
-            {/* Botón de envío */}
+        {/* Navegación */}
+        <div className="hidden md:flex items-center space-x-8">
+          {sections.map((section, index) => (
             <motion.button
-              type="submit"
-              variants={{
-                hidden: { opacity: 0, scale: 0.9 },
-                visible: { opacity: 1, scale: 1 },
-              }}
-              whileHover={{ 
-                scale: 1.02,
-                boxShadow: "0px 10px 30px rgba(59, 130, 246, 0.4)" 
-              }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold py-4 rounded-2xl shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-blue-500/25"
+              key={section.id}
+              onClick={() => setCurrentSection(index)}
+              className={`text-sm font-medium transition-all duration-300 ${
+                currentSection === index 
+                  ? 'text-cyan-400' 
+                  : 'text-slate-300 hover:text-cyan-300'
+              }`}
+              whileHover={{ scale: 1.1, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Cuentame sobre ti !!
+              {section.number}
             </motion.button>
-          </motion.form>
+          ))}
+        </div>
+        
+        {/* CTA Buttons */}
+        <div className="flex items-center space-x-4">
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link
+            href="/interviewHistory"
+            className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-2xl font-semibold text-sm hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-lg shadow-blue-500/25 backdrop-blur-sm"
+          >
+            Ver historial
+          </Link>
         </motion.div>
 
-        {/* Footer  */}
-        <motion.div
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link
+            href="/interviewStart"
+            className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-2xl font-semibold text-sm hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-lg shadow-blue-500/25 backdrop-blur-sm"
+          >
+            Comenzar Entrevista
+          </Link>
+        </motion.div>
+      </div>
+    </div>
+    </motion.nav>
+  );
+
+  // Loader con identidad TrainerView
+  const TrainerViewLoader = () => (
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 0 }}
+      transition={{ duration: 0.5, delay: 0.5 }}
+      onAnimationComplete={() => setIsLoading(false)}
+      className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center"
+    >
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        className="w-20 h-20 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/25"
+      >
+        <motion.span 
+          className="text-white font-bold text-xl"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1, repeat: Infinity }}
+        >
+          TV
+        </motion.span>
+      </motion.div>
+    </motion.div>
+  );
+
+  // Componente de sección
+  const Section = ({ section, index }: { section: typeof sections[0], index: number }) => (
+    <motion.section
+      ref={el => sectionsRef.current[index] = el}
+      id={section.id}
+      className="h-screen w-screen flex-shrink-0 flex items-center justify-center relative overflow-hidden"
+      style={{ background: section.background }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
+      {/* Efectos de fondo similares a la app */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Número de sección sutil */}
+      <motion.div
+        className="absolute left-8 bottom-8 text-slate-600 text-8xl font-black"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        {section.number}
+      </motion.div>
+
+      {/* Contenido principal */}
+      <div className="text-center max-w-4xl mx-auto px-8 relative z-10">
+        <motion.h2
+          className="text-5xl md:text-7xl font-bold text-white mb-6"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3 }}
+        >
+          {section.title}
+        </motion.h2>
+        
+        <motion.p
+          className="text-xl text-cyan-400 font-semibold tracking-wide mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-8 text-slate-400 text-sm"
+          transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <p>Universidad Eafit @ Simón Sloan</p>
-        </motion.div>
+          {section.subtitle}
+        </motion.p>
+
+        <motion.p
+          className="text-lg text-slate-300 font-light mb-12 max-w-2xl mx-auto leading-relaxed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+        >
+          {section.description}
+        </motion.p>
+
+        <SectionContent section={section} index={index} />
+      </div>
+    </motion.section>
+  );
+
+  // Contenido específico para cada sección
+  const SectionContent = ({ section, index }: { section: typeof sections[0], index: number }) => {
+    switch (index) {
+      case 0: // Hero
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="space-y-8"
+          >
+            <div className="space-y-6">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/interviewStart"
+                  className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-2xl shadow-blue-500/25"
+                >
+                  Comenzar Entrevista Gratis
+                </Link>
+              </motion.div>
+              
+              <div className="flex justify-center space-x-6 text-slate-400 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Sin registro</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Comienza ya</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>100% Gratuito</span>
+                </div>
+              </div>
+            </div>
+            
+            <motion.p
+              className="text-slate-500 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              Desliza o usa las flechas para explorar
+            </motion.p>
+          </motion.div>
+        );
+
+      case 1: // Problem
+        return (
+          <motion.div
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+          >
+            <div className="grid md:grid-cols-2 gap-8">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1 }}
+                className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50"
+              >
+                <div className="text-cyan-400 text-4xl mb-4">🤔</div>
+                <h3 className="text-white text-xl font-semibold mb-4">Problemas Comunes</h3>
+                <ul className="text-slate-300 space-y-3 text-left">
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span>Nervios y falta de confianza</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span>Preparación genérica e inefectiva</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span>Falta de feedback realista</span>
+                  </li>
+                </ul>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2 }}
+                className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50"
+              >
+                <div className="text-cyan-400 text-4xl mb-4">💼</div>
+                <h3 className="text-white text-xl font-semibold mb-4">Consecuencias</h3>
+                <ul className="text-slate-300 space-y-3 text-left">
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span>Oportunidades perdidas</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span>Procesos más largos</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span>Frustración constante</span>
+                  </li>
+                </ul>
+              </motion.div>
+            </div>
+          </motion.div>
+        );
+
+      case 2: // Solution
+        return (
+          <motion.div
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+          >
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: '🤖',
+                  title: 'IA Adaptativa',
+                  description: 'Se ajusta a tu nivel y stack tecnológico'
+                },
+                {
+                  icon: '💬',
+                  title: 'Feedback Instantáneo',
+                  description: 'Análisis detallado de cada respuesta'
+                },
+                {
+                  icon: '🎯',
+                  title: 'Personalizado',
+                  description: 'Preguntas específicas para tu perfil'
+                }
+              ].map((feature, i) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.9 + i * 0.2 }}
+                  className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50 text-center hover:border-cyan-500/30 transition-all duration-300"
+                >
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-cyan-400 text-lg font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-slate-300 text-sm leading-relaxed">{feature.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case 3: // Demo
+        return (
+          <motion.div
+            className="max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+          >
+            <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50">
+              <div className="text-center mb-6">
+                <div className="text-cyan-400 text-4xl mb-4">💻</div>
+                <h3 className="text-white text-xl font-semibold mb-2">Experiencia Inmersiva</h3>
+                <p className="text-slate-300">Chat realista con IA como entrevistador</p>
+              </div>
+              
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-xs">AI</span>
+                  </div>
+                  <div className="bg-slate-700/50 rounded-2xl rounded-tl-none p-4 flex-1">
+                    <p className="text-slate-200 text-sm">
+                      "Cuéntame sobre un proyecto donde usaste JavaScript y React..."
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 justify-end">
+                  <div className="bg-cyan-500/20 rounded-2xl rounded-tr-none p-4 max-w-xs">
+                    <p className="text-slate-200 text-sm">
+                      "Desarrollé una aplicación de gestión de tareas con React..."
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-xs">TÚ</span>
+                  </div>
+                </div>
+              </div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/interviewStart"
+                  className="block w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-xl font-semibold text-center hover:from-blue-700 hover:to-cyan-700 transition-all duration-300"
+                >
+                  Probar Demo Interactivo
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        );
+
+      case 4: // Start
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="space-y-8"
+          >
+            <div className="space-y-6">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/interviewStart"
+                  className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-2xl shadow-blue-500/25"
+                >
+                  Comenzar Ahora - 100% Gratis
+                </Link>
+              </motion.div>
+              
+              <div className="grid grid-cols-3 gap-4 text-slate-300 text-sm">
+                <div className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <div className="text-green-400 text-2xl mb-2">✓</div>
+                  <div>Sin registro</div>
+                </div>
+                <div className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <div className="text-green-400 text-2xl mb-2">⚡</div>
+                  <div>Inmediato</div>
+                </div>
+                <div className="text-center p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <div className="text-green-400 text-2xl mb-2">🎯</div>
+                  <div>Personalizado</div>
+                </div>
+              </div>
+            </div>
+
+            <motion.p
+              className="text-slate-400 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              Únete a miles de desarrolladores que están transformando sus carreras
+            </motion.p>
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      <AnimatePresence>
+        {isLoading && <TrainerViewLoader />}
+      </AnimatePresence>
+
+      <TrainerViewNavbar />
+
+      <motion.main
+        ref={containerRef}
+        className="flex h-screen overflow-x-hidden snap-x snap-mandatory"
+        style={{
+          scrollBehavior: 'smooth',
+          scrollSnapType: 'x mandatory'
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {sections.map((section, index) => (
+          <Section key={section.id} section={section} index={index} />
+        ))}
+      </motion.main>
+
+      {/* Indicador de progreso */}
+      <motion.div
+        className="fixed right-8 top-1/2 transform -translate-y-1/2 z-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        <div className="flex flex-col space-y-4">
+          {sections.map((section, index) => (
+            <motion.button
+              key={section.id}
+              onClick={() => setCurrentSection(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                currentSection === index 
+                  ? 'bg-cyan-400 scale-125 shadow-lg shadow-cyan-400/25' 
+                  : 'bg-slate-600 hover:bg-cyan-300'
+              }`}
+              whileHover={{ scale: 1.3 }}
+              whileTap={{ scale: 0.8 }}
+            />
+          ))}
+        </div>
       </motion.div>
-    </div>
+    </>
   );
 }
-
-export default HomePage;

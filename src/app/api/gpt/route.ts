@@ -146,7 +146,18 @@ const preguntasEstandar = [
 
 export async function POST(request: Request) {
   try {
-    const { userName , userJob , numberOfQuestions } = await request.json();
+    const { userName , userJob , numberOfQuestions, HabilidadesUsuario} = await request.json();
+    const habilidadesTecnicas = HabilidadesUsuario?.habilidadesTecnicas || "";
+    const habilidadesPresion = HabilidadesUsuario?.habilidadesPresion || "";
+    
+    console.log(" INICIANDO GENERACIÓN DE PREGUNTAS");
+    console.log(" Datos recibidos:", {
+      userName,
+      userJob, 
+      numberOfQuestions,
+      habilidadesTecnicas,
+      habilidadesPresion
+    });
 
     let gptQuestions; 
     let randomQuestions; 
@@ -187,7 +198,11 @@ export async function POST(request: Request) {
   2. trabajo bajo presión ( situación donde hay limite de tiempo para entregar un trabajo, deadlines, etc).
   Estas preguntas deben estar equilibradas, todas no deben ser de una sola categoria.
   El resultado debe entregarse únicamente en un JSON válido que represente una lista de preguntas, 
-  sin explicaciones ni texto adicional. 
+  sin explicaciones ni texto adicional. Por cierto, tendrás presentes las siguientes caracteristicas del usuario y con base en ellas formularás preguntas que ayuden a suplir sus dificultades o ampliar sus fortalezas en las categorias: 
+  1. habilidades técnicas: ${habilidadesTecnicas}
+  2. habildades bajo presión: ${habilidadesPresion}
+
+  Si no recibes nada, ignora esta ultima indicación. 
 
   Cada pregunta debe tener los siguientes campos:
   - id: número autoincremental empezando en 1
@@ -209,7 +224,7 @@ export async function POST(request: Request) {
     })
 
     const text = completion.choices?.[0]?.message?.content?.trim() ?? "" //Get the response of gpt
-
+    
     // Número de preguntas random que quieres
     function getRandomPreguntas(cantidad: number) {
       const idsDisponibles = preguntasEstandar.map(p => p.id); // [1..20]
