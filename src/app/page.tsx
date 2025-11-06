@@ -194,8 +194,8 @@ export default function PromotionPage() {
       ref={el => sectionsRef.current[index] = el}
       id={section.id}
       className="h-screen w-screen flex-shrink-0 flex items-center justify-center relative overflow-hidden"
-      style={{ background: section.background }}
-      initial={{ opacity: 0 }}
+      style={{ background: section.background}}
+      initial={false} // Se desactiva para que no salga el flash maluco 
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
