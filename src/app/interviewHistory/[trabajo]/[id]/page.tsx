@@ -31,6 +31,7 @@ export default function EntrevistaDetallePage() {
     respuestas: { textoRespuesta: string }[];
   }
 
+
   const [entrevista, setEntrevista] = useState<Interview>();
   const [mode, setMode] = useState<"details" | "charts">("details");
 
@@ -51,8 +52,6 @@ export default function EntrevistaDetallePage() {
       </div>
     );
   }
-
-  console.log(entrevista.analisis[0].analisis)
 
   const labels = ["Comunicación", "Trabajo bajo presión", "Habilidades técnicas"];
   const singleValues = entrevista
@@ -254,7 +253,7 @@ export default function EntrevistaDetallePage() {
             <h2 className="text-2xl font-bold mb-4 text-white drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
               🧠 Retroalimentación de la entrevista
             </h2>
-            {entrevista.analisis[0].analisis.map((a: any, index: number) => (
+            {entrevista.analisis.map((a: any, index: number) => (
               <div
                 key={index}
                 className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-5 mb-4 shadow-md hover:shadow-cyan-500/20 transition-all duration-300"

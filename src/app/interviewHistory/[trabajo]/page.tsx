@@ -159,7 +159,6 @@ export default function TrabajoPage({ params }: Props) {
 
 
     if (!nombreTrabajo) return notFound();
-    console.log("Estos son los param", nombreTrabajo);
 
     async function getInterviews() {
         try {
@@ -167,7 +166,7 @@ export default function TrabajoPage({ params }: Props) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    trabajo: nombreTrabajo,
+                    trabajoParam: nombreTrabajo,
                     usuario: 1,
                 }),
             });
@@ -351,7 +350,7 @@ export default function TrabajoPage({ params }: Props) {
                     >
                         Entrevistas para{" "}
                         <span className="text-cyan-400 ">
-                            {nombreTrabajo}
+                            {decodeURIComponent(nombreTrabajo)}
                         </span>
                     </motion.h1>
 

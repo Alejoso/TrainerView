@@ -322,7 +322,7 @@ function HomePage() {
           transition={{ delay: 0.6 }}
           className="text-center mt-8 text-slate-400 text-sm"
         >
-          <p>Universidad Eafit @ Simón Sloan</p>
+          <p>Universidad Eafit @ TrainerView</p>
         </motion.div>
       </motion.div>
     </div>

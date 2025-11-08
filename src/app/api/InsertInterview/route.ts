@@ -20,21 +20,31 @@ export async function POST(req: Request) {
         trabajo,
       } = await req.json();
 
-      const analisis = JSON.parse(analisis_entrada.analisis)
+      const analisisNoLimpio = JSON.parse(analisis_entrada.analisis)
 
-      if(!analisis || !preguntas_entrada || !respuestas_entrada)
+
+      if(!analisisNoLimpio || !preguntas_entrada || !respuestas_entrada)
       {
         return NextResponse.json(
             { error: "Error, faltan campos"},
             { status: 400 }
           );
       }
+      
+      const analisis = analisisNoLimpio.analisis.map((p:any) => ({
+        Categoria: p.Categoria,
+        puntuaciónGeneral: p.puntuaciónGeneral,
+        DetalleFeedback: p.DetalleFeedback,
+      }))
+
+      console.log(analisis)
 
       const preguntas = preguntas_entrada.map((p:any) => ({
         id: p.id,
         categoria: p.categoria,
         textoPregunta: p.textoPregunta,
       }));
+
 
       const respuestas = respuestas_entrada.map((p:any) => ({
         id: p.id,
