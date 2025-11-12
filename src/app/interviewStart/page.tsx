@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
+import Link from "next/link";
 
 function HomePage() {
   const [formData, setFormData] = useState({
@@ -186,6 +187,13 @@ function HomePage() {
           },
         }}
       />
+      
+      <motion.button
+        onClick={() => router.push('/')}
+        className="absolute top-6 left-6 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 rounded-full shadow-lg hover:bg-white/20 transition"
+      >
+        ← Inicio
+      </motion.button>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

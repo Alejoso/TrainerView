@@ -87,7 +87,14 @@ export default function Habilities() {
             <div className="absolute top-1/4 -left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
             <div className="absolute bottom-1/4 -right-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
-
+            <motion.button
+                onClick={() => router.push('/interviewStart')}
+                className="absolute top-6 left-6 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 rounded-full shadow-lg hover:bg-white/20 transition"
+                >
+                ← Volver
+            </motion.button>
+                  
+            
             {/* Container principal */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -23,6 +23,7 @@ interface Props {
 }
 
 export default function TrabajoPage({ params }: Props) {
+    const router = useRouter();
     const nombreTrabajo = use(params).trabajo
     const [loading, setloading] = useState<boolean>(true);
     const [gotInterviews, setGotInterviews] = useState<boolean>(false);
@@ -326,7 +327,14 @@ export default function TrabajoPage({ params }: Props) {
             <div className="absolute top-1/4 -left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
             <div className="absolute bottom-1/4 -right-10 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-
+            
+            <motion.button
+                onClick={() => router.push('/interviewHistory')}
+                className="absolute top-6 left-6 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 rounded-full shadow-lg hover:bg-white/20 transition"
+                >
+                ← Volver
+            </motion.button>
+            
             {loading ? (
                 <div className="flex justify-center items-center h-[60vh]">
                     <p className="text-slate-400 text-xl animate-pulse">

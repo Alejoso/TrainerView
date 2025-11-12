@@ -540,6 +540,19 @@ function InterviewAnalysis() {
             </svg>
             Descargar en PDF
           </motion.button>
+
+           <motion.button
+            onClick={() => router.push("/interviewHistory")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gradient-to-r ml-5 from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Ir al historial
+          </motion.button>
+
         </motion.div>
 
         {/* Footer */}
