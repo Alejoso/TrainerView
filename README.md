@@ -1,6 +1,8 @@
 
 ## How to Run the Project
 
+Note: These steps are confirmed to work on Linux. Windows steps are similar, but some terminal commands may vary.
+
 ### 1. Clone the repository
 
 ```bash
