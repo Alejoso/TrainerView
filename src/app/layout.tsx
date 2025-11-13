@@ -13,8 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrainerView",
-  description: "TrainerView - Your AI Training Companion",
+  title: "TrainerView - AI Interview Training",
+  description: "TrainerView - Your AI Training Companion for Interview Practice",
+  icons: {
+    icon: [
+      { url: '/tv-logo.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml', sizes: '32x32' }
+    ],
+    apple: '/tv-logo.svg',
+  },
 };
 
 export default function RootLayout({

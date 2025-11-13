@@ -6,19 +6,22 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const { trabajo, usuario } = await req.json();
+    const { trabajoParam, usuario } = await req.json();
 
-    if (!trabajo || !usuario) {
+    if (!trabajoParam || !usuario) {
       return NextResponse.json(
         { error: "Faltan parámetros (trabajo o usuario)" },
         { status: 400 }
       );
     }
 
+    const trabajo = decodeURIComponent(trabajoParam); 
+
     // Buscar todas las entrevistas que coincidan con el usuario y el trabajo
     const entrevistas = await Entrevista.find({ trabajo, usuario });
 
     if (entrevistas.length === 0) {
+      console.log("No encontre :(")
       return NextResponse.json(
         { message: "No hay entrevistas registradas para ese trabajo" },
         { status: 404 }

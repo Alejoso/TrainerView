@@ -219,6 +219,7 @@ function InterviewAnalysis() {
   async function insertDataBase() {
     try {
       const analisis_entrada = JSON.parse(localStorage.getItem("analisis") || "{}"); 
+
       const preguntas_entrada = JSON.parse(localStorage.getItem("preguntas") || "{}" )
       const respuestas_entrada = JSON.parse(localStorage.getItem("respuestas") || "{}" )
       const trabajo = localStorage.getItem("userJob"); 
@@ -517,7 +518,7 @@ function InterviewAnalysis() {
           transition={{ delay: 1.2, duration: 0.5 }}
         >
           <motion.button 
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3"
@@ -525,7 +526,7 @@ function InterviewAnalysis() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Volver a la Entrevista
+            Volver al incio
           </motion.button>
 
           <motion.button
@@ -539,6 +540,19 @@ function InterviewAnalysis() {
             </svg>
             Descargar en PDF
           </motion.button>
+
+           <motion.button
+            onClick={() => router.push("/interviewHistory")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gradient-to-r ml-5 from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 backdrop-blur-sm hover:shadow-emerald-500/25 flex items-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Ir al historial
+          </motion.button>
+
         </motion.div>
 
         {/* Footer */}
@@ -548,7 +562,7 @@ function InterviewAnalysis() {
           transition={{ delay: 1.4, duration: 0.5 }}
           className="text-center mt-8 text-slate-400 text-sm no-pdf"
         >
-          <p>Universidad Eafit @ Simón Sloan</p>
+          <p>Universidad Eafit @ TrainerView</p>
         </motion.div>
       </motion.div>
       </div>
